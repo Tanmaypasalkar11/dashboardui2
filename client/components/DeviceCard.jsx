@@ -99,7 +99,7 @@ export default function DeviceCard({
   const statusColor = status === "online" ? "#60FAC4" : "#FF7373";
 
   return (
-    <article className="flex h-[223px] w-[315px] shrink-0 items-center justify-center rounded-[15px] border border-[#e5e7eb] bg-white p-[28px_20px_12px_17px] transition-all duration-300 ease-out hover:scale-105 hover:border-[#d1d5db] hover:shadow-[0_20px_40px_rgba(0,0,0,0.15),0_8px_16px_rgba(0,0,0,0.10)]">
+    <article className="flex h-[223px] w-[315px] shrink-0 items-center justify-center rounded-[15px] border border-[#e5e7eb] bg-white p-[28px_20px_12px_17px] transition-all duration-300 ease-out hover:shadow-[0_20px_40px_rgba(0,0,0,0.15),0_8px_16px_rgba(0,0,0,0.10)]">
       <div className="flex h-[183px] w-[278px] flex-col justify-between">
         <div className="flex items-start justify-between">
           <div className="flex min-w-0 items-start gap-[12px]">
