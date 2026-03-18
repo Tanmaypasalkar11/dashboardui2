@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import AddGroupModal from "@/components/dashboard/AddGroupModal";
+import DeleteModal from "./DeleteModal";
 
 const groupCards = [
   { id: 1, name: "Group 1", label: "GCU", description: "I've updated the user interface" },
@@ -20,7 +21,7 @@ const groupMenuItems = [
   { icon: "/share-06.svg", label: "Share" },
 ];
 
-function GroupCardMenu({ onClose, onEdit }) {
+function GroupCardMenu({ onClose, onEdit, onDelete }) {
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -46,6 +47,8 @@ function GroupCardMenu({ onClose, onEdit }) {
           onClick={() => {
             if (item.label === "Edit") {
               onEdit();
+            } else if (item.label === "Delete") {
+              onDelete();
             }
             onClose();
           }}
@@ -66,7 +69,7 @@ function GroupCardMenu({ onClose, onEdit }) {
   );
 }
 
-function GroupCardMenuButton({ onEdit }) {
+function GroupCardMenuButton({ onEdit, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -87,7 +90,11 @@ function GroupCardMenuButton({ onEdit }) {
         </span>
       </button>
       {menuOpen ? (
-        <GroupCardMenu onClose={() => setMenuOpen(false)} onEdit={onEdit} />
+        <GroupCardMenu
+          onClose={() => setMenuOpen(false)}
+          onEdit={onEdit}
+          onDelete={onDelete}
+        />
       ) : null}
     </div>
   );
@@ -106,8 +113,9 @@ function GroupCardGlyph() {
   );
 }
 
-function GroupCardItem({ group }) {
+function GroupCardItem({ group, onDelete }) {
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [groupData, setGroupData] = useState({
     name: group.name,
     description: group.description,
@@ -134,7 +142,10 @@ function GroupCardItem({ group }) {
             </p>
           </div>
 
-          <GroupCardMenuButton onEdit={() => setEditModalOpen(true)} />
+          <GroupCardMenuButton
+            onEdit={() => setEditModalOpen(true)}
+            onDelete={() => setDeleteModalOpen(true)}
+          />
         </div>
       </article>
 
@@ -149,16 +160,30 @@ function GroupCardItem({ group }) {
         title="Edit Group"
         confirmLabel="Save"
       />
+
+      <DeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={() => onDelete(group.id)}
+      />
     </>
   );
 }
 
 export default function GroupCardGrid() {
+  const [groups, setGroups] = useState(groupCards);
+
   return (
     <div className="pt-[24.5px]">
       <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-[15px]">
-        {groupCards.map((group) => (
-          <GroupCardItem key={group.id} group={group} />
+        {groups.map((group) => (
+          <GroupCardItem
+            key={group.id}
+            group={group}
+            onDelete={(groupId) => {
+              setGroups((current) => current.filter((item) => item.id !== groupId));
+            }}
+          />
         ))}
       </div>
     </div>

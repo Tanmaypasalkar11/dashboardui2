@@ -5,6 +5,8 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "allowJs": true,
+    "checkJs": false,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -33,11 +35,11 @@
     }
   },
   "include": [
-    "client/**/*",
-    "server/**/*",
-    "shared/**/*",
-    "vite.config.ts",
-    "vite.config.server.ts"
+    "client",
+    "server",
+    "shared",
+    "vite.config.js",
+    "vite.config.server.js"
   ],
   "exclude": ["node_modules", "dist"]
 }

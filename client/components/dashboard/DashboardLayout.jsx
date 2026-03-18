@@ -1,7 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import DashboardLogo from "@/components/dashboard/DashboardLogo";
+
+const SEARCH_BUTTON_SIZE = 36;
+const SEARCH_EXPANDED_WIDTH = 250;
+const CUSTOM_SCROLLBAR_WIDTH = 10;
+const CUSTOM_SCROLLBAR_THUMB_HEIGHT = 364;
 
 function UserAvatar() {
   return (
@@ -140,6 +145,338 @@ function ProfileCard() {
   );
 }
 
+function ExpandableSearchButton() {
+  const [query, setQuery] = useState("");
+  const [isHovered, setIsHovered] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const rootRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const collapse = useCallback(() => {
+    setIsExpanded(false);
+    setIsFocused(false);
+    setIsHovered(false);
+  }, []);
+
+  const open = useCallback(() => {
+    setIsExpanded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isExpanded) {
+      inputRef.current?.focus();
+    }
+  }, [isExpanded]);
+
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    const handlePointerDown = (event) => {
+      if (!rootRef.current?.contains(event.target)) {
+        collapse();
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () =>
+      document.removeEventListener("pointerdown", handlePointerDown);
+  }, [collapse, isExpanded]);
+
+  const handleBlur = (event) => {
+    const nextFocused = event.relatedTarget;
+    if (!rootRef.current?.contains(nextFocused)) {
+      collapse();
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === "Escape") {
+      event.preventDefault();
+      collapse();
+    }
+  };
+
+  const shellWidth = isExpanded
+    ? SEARCH_EXPANDED_WIDTH
+    : isHovered
+      ? SEARCH_EXPANDED_WIDTH
+      : SEARCH_BUTTON_SIZE;
+
+  return (
+    <div
+      ref={rootRef}
+      className="relative h-9 w-9 shrink-0 overflow-visible"
+      onMouseEnter={() => {
+        if (!isExpanded) setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        if (!isExpanded) setIsHovered(false);
+      }}
+    >
+      <div
+        className={[
+          "absolute right-0 top-0 h-9 overflow-hidden rounded-full bg-white",
+          "border transition-[width,border-color,box-shadow] duration-300 ease-in-out",
+          isFocused
+            ? "border-[#bfdbfe] shadow-[0_10px_30px_rgba(15,23,42,0.10),0_0_0_4px_rgba(59,130,246,0.08)]"
+            : "border-[#d1d5db] shadow-[0_2px_4px_rgba(0,0,0,0.05)]",
+        ].join(" ")}
+        style={{ width: `${shellWidth}px` }}
+      >
+        <Search
+          className={[
+            "pointer-events-none absolute top-1/2 z-10 h-4 w-4 text-[#6b7280] transition-all duration-300 ease-in-out",
+            isExpanded || isHovered
+              ? "left-3 -translate-y-1/2"
+              : "left-1/2 -translate-x-1/2 -translate-y-1/2",
+          ].join(" ")}
+        />
+
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          placeholder="Search..."
+          onChange={(event) => setQuery(event.target.value)}
+          onFocus={() => {
+            open();
+            setIsFocused(true);
+          }}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          className={[
+            "h-full w-full bg-transparent pr-4 text-sm text-slate-900 outline-none",
+            "transition-opacity duration-200 ease-in-out placeholder:text-slate-400",
+            isExpanded
+              ? "cursor-text pl-10 opacity-100"
+              : "pointer-events-none cursor-pointer pl-10 opacity-0",
+          ].join(" ")}
+          aria-label="Search"
+        />
+
+        {!isExpanded ? (
+          <button
+            type="button"
+            aria-label="Open search"
+            aria-expanded={isExpanded}
+            onClick={open}
+            className="absolute inset-0 rounded-full"
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function CustomScrollbar({ children }) {
+  const scrollRef = useRef(null);
+  const trackRef = useRef(null);
+  const hideTimeoutRef = useRef(null);
+  const dragStateRef = useRef({
+    pointerId: null,
+    startY: 0,
+    startScrollTop: 0,
+  });
+
+  const [scrollState, setScrollState] = useState({
+    isScrollable: false,
+    thumbHeight: 0,
+    thumbTop: 0,
+  });
+  const [isScrollbarVisible, setIsScrollbarVisible] = useState(false);
+
+  const scheduleScrollbarHide = useCallback((delay = 700) => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsScrollbarVisible(false);
+    }, delay);
+  }, []);
+
+  const showScrollbar = useCallback(() => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+
+    setIsScrollbarVisible(true);
+  }, []);
+
+  const updateScrollState = useCallback(() => {
+    const element = scrollRef.current;
+
+    if (!element) return;
+
+    const { clientHeight, scrollHeight, scrollTop } = element;
+    const isScrollable = scrollHeight > clientHeight + 1;
+
+    if (!isScrollable) {
+      setIsScrollbarVisible(false);
+      setScrollState({
+        isScrollable: false,
+        thumbHeight: 0,
+        thumbTop: 0,
+      });
+      return;
+    }
+
+    const trackHeight = clientHeight;
+    const thumbHeight = Math.min(CUSTOM_SCROLLBAR_THUMB_HEIGHT, trackHeight);
+    const maxThumbTravel = trackHeight - thumbHeight;
+    const maxScrollTop = scrollHeight - clientHeight;
+    const thumbTop =
+      maxScrollTop > 0 ? (scrollTop / maxScrollTop) * maxThumbTravel : 0;
+
+    setScrollState({
+      isScrollable: true,
+      thumbHeight,
+      thumbTop,
+    });
+  }, []);
+
+  useEffect(() => {
+    updateScrollState();
+
+    const element = scrollRef.current;
+    if (!element) return;
+
+    const handleScroll = () => {
+      showScrollbar();
+      scheduleScrollbarHide();
+      updateScrollState();
+    };
+    const resizeObserver = new ResizeObserver(() => updateScrollState());
+
+    element.addEventListener("scroll", handleScroll, { passive: true });
+    resizeObserver.observe(element);
+
+    Array.from(element.children).forEach((child) => resizeObserver.observe(child));
+
+    window.addEventListener("resize", updateScrollState);
+
+    return () => {
+      element.removeEventListener("scroll", handleScroll);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [children, scheduleScrollbarHide, showScrollbar, updateScrollState]);
+
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handlePointerMove = (event) => {
+      const element = scrollRef.current;
+      const track = trackRef.current;
+      const dragState = dragStateRef.current;
+
+      if (
+        !element ||
+        !track ||
+        dragState.pointerId === null ||
+        event.pointerId !== dragState.pointerId
+      ) {
+        return;
+      }
+
+      const deltaY = event.clientY - dragState.startY;
+      const maxScrollTop = element.scrollHeight - element.clientHeight;
+      const maxThumbTravel = track.clientHeight - scrollState.thumbHeight;
+
+      if (maxScrollTop <= 0 || maxThumbTravel <= 0) return;
+
+      const scrollRatio = maxScrollTop / maxThumbTravel;
+      element.scrollTop = dragState.startScrollTop + deltaY * scrollRatio;
+    };
+
+    const handlePointerUp = (event) => {
+      if (dragStateRef.current.pointerId !== event.pointerId) return;
+      dragStateRef.current.pointerId = null;
+      scheduleScrollbarHide();
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, [scheduleScrollbarHide, scrollState.thumbHeight]);
+
+  const handleThumbPointerDown = (event) => {
+    const element = scrollRef.current;
+    if (!element) return;
+
+    showScrollbar();
+
+    dragStateRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startScrollTop: element.scrollTop,
+    };
+  };
+
+  const handleTrackPointerDown = (event) => {
+    const element = scrollRef.current;
+    const track = trackRef.current;
+
+    if (!element || !track) return;
+
+    const rect = track.getBoundingClientRect();
+    const clickOffset = event.clientY - rect.top - scrollState.thumbHeight / 2;
+    const maxThumbTravel = rect.height - scrollState.thumbHeight;
+    const boundedOffset = Math.max(0, Math.min(clickOffset, maxThumbTravel));
+    const maxScrollTop = element.scrollHeight - element.clientHeight;
+
+    if (maxScrollTop <= 0 || maxThumbTravel <= 0) return;
+
+    element.scrollTop = (boundedOffset / maxThumbTravel) * maxScrollTop;
+  };
+
+  return (
+    <div className="relative mr-[13px] min-h-0 flex-1">
+      <div
+        ref={scrollRef}
+        className="dashboard-panel-scroll flex h-full min-h-0 flex-col overflow-y-auto overscroll-y-contain overflow-x-hidden"
+      >
+        {children}
+      </div>
+
+      {scrollState.isScrollable ? (
+        <div
+          ref={trackRef}
+          className={[
+            "absolute right-0 top-0 h-full rounded-[5px] bg-transparent transition-opacity duration-300 ease-in-out",
+            isScrollbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+          ].join(" ")}
+          style={{ width: `${CUSTOM_SCROLLBAR_WIDTH}px` }}
+          onPointerDown={handleTrackPointerDown}
+        >
+          <div
+            role="presentation"
+            className="absolute left-0 cursor-grab rounded-[5px] bg-[#d9d9d9] active:cursor-grabbing"
+            style={{
+              height: `${scrollState.thumbHeight}px`,
+              width: `${CUSTOM_SCROLLBAR_WIDTH}px`,
+              transform: `translateY(${scrollState.thumbTop}px)`,
+            }}
+            onPointerDown={handleThumbPointerDown}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function DashboardLayout({ toolbar, children }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileMenuRef = useRef(null);
@@ -166,13 +503,7 @@ export default function DashboardLayout({ toolbar, children }) {
             <DashboardLogo />
 
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d1d5db] bg-white text-[#6b7280] shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-all duration-200 hover:text-[#2d61f4] hover:border-[#2d61f4] hover:shadow-[0_4px_12px_rgba(45,97,244,0.2)]"
-                aria-label="Search"
-              >
-                <Search className="h-4 w-4" />
-              </button>
+              <ExpandableSearchButton />
               <div ref={profileMenuRef} className="relative z-[40]">
                 <button
                   type="button"
@@ -198,9 +529,7 @@ export default function DashboardLayout({ toolbar, children }) {
                   <div className="mt-5 h-px bg-[#eef1f5]" />
                 </div>
               ) : null}
-              <div className="dashboard-panel-scroll mr-[13px] flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain overflow-x-hidden">
-                {children}
-              </div>
+              <CustomScrollbar>{children}</CustomScrollbar>
             </div>
 
             <div className="hidden lg:block lg:w-[24px]" />

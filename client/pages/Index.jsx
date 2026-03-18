@@ -41,18 +41,16 @@ export default function Index() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Handle filter selection - auto-switch to Available tab
+  // Apply the selected group without forcing a tab change
   const handleGroupSelect = useCallback((groupId) => {
     setSelectedGroup(groupId);
-    setSelectedTab("available"); // Auto-switch to Available tab when filter applied
     setGroupMenuOpen(false);
   }, []);
 
-  // Handle filter clear - switch back to All tab
+  // Clear the group filter and keep the current tab unchanged
   const handleClearFilter = useCallback(() => {
     setSelectedGroup(null);
-    setSelectedTab("all"); // Switch back to All tab when filter cleared
-    setGroupMenuOpen(false); // Close the dropdown menu
+    setGroupMenuOpen(false);
   }, []);
 
   // Animate active tab indicator
@@ -223,7 +221,7 @@ export default function Index() {
   return (
     <>
       <DashboardLayout toolbar={toolbar}>
-        <div className="shrink-0 pb-[28px] pl-[43px] pr-[18px] pt-[6px]">
+        <div className="shrink-0 pb-[28px] pl-[43px] pr-[41px] pt-[6px]">
           {emptyStateMessage ? (
             <div className="flex h-[400px] items-center justify-center">
               <div className="text-center">

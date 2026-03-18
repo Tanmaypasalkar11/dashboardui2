@@ -31,7 +31,7 @@ export default function GroupPage() {
   return (
     <>
       <DashboardLayout toolbar={toolbar}>
-        <div className="-mt-[16px] pl-[43px] pt-0">
+        <div className="-mt-[16px] pl-[43px] pr-[41px] pt-0">
           <GroupCardGrid />
         </div>
       </DashboardLayout>
