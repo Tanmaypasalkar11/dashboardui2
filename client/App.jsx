@@ -9,74 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GroupPage from "./pages/GroupPage";
 const queryClient = new QueryClient();
-const localFontFaces = `
-  @import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap');
-  @font-face {
-    font-family: 'Inter';
-    src: url('/fonts/inter-400.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Inter';
-    src: url('/fonts/inter-500.ttf') format('truetype');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Inter';
-    src: url('/fonts/inter-600.ttf') format('truetype');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Inter';
-    src: url('/fonts/inter-700.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'Inter';
-    src: url('/fonts/inter-800.ttf') format('truetype');
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'DM Sans';
-    src: url('/fonts/dm-sans-400.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'DM Sans';
-    src: url('/fonts/dm-sans-500.ttf') format('truetype');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'DM Sans';
-    src: url('/fonts/dm-sans-600.ttf') format('truetype');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-  }
-  @font-face {
-    font-family: 'DM Sans';
-    src: url('/fonts/dm-sans-700.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
-`;
 const App = () => (<QueryClientProvider client={queryClient}>
-    <style>{localFontFaces}</style>
     <TooltipProvider>
       <Toaster />
       <Sonner />

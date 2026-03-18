@@ -7,7 +7,7 @@ function UserAvatar() {
   return (
     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ffffff_0%,#e7efff_48%,#ffffff_100%)] p-[2px] shadow-[0_8px_18px_rgba(34,82,214,0.18)]">
       <img
-        src="/dog-avatar.jpg"
+        src="/Avatar.png"
         alt="User avatar"
         className="h-full w-full rounded-full object-cover"
       />
@@ -91,7 +91,7 @@ function ProfileCard() {
           <div className="relative flex h-[65px] w-[65px] items-center justify-center">
             <div className="absolute inset-0 rounded-[200px] border-[0.75px] border-[rgba(3,15,14,0.08)] opacity-[0.08]" />
             <img
-              src="/dog-avatar.jpg"
+              src="/Avatar.png"
               alt="Olivia Rhye"
               className="h-full w-full rounded-full object-cover shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
             />
@@ -159,9 +159,9 @@ export default function DashboardLayout({ toolbar, children }) {
   }, []);
 
   return (
-    <div className="dashboard-stage min-h-screen px-3 py-3 sm:px-4 sm:py-4 lg:px-0 lg:py-0">
-      <div className="mx-auto flex w-full max-w-[1512px] flex-col lg:w-[1512px]">
-        <div className="dashboard-shell flex min-h-[calc(100vh-24px)] w-full flex-col overflow-hidden rounded-none bg-white sm:min-h-[calc(100vh-32px)] lg:h-[980px] lg:min-h-[980px] lg:w-[1512px]">
+    <div className="dashboard-stage min-h-screen px-3 py-3 sm:px-4 sm:py-4 lg:px-0 lg:py-0 -ml-[5px]">
+      <div className="flex w-full flex-col">
+        <div className="dashboard-shell flex min-h-[calc(100vh-24px)] w-full flex-col overflow-hidden rounded-none bg-white sm:min-h-[calc(100vh-32px)] lg:h-[980px] lg:min-h-[980px]">
           <header className="relative z-[30] flex h-[74px] min-h-[74px] items-center justify-between bg-gradient-to-r from-white to-[#fafbfc] px-4 py-4 sm:px-6 lg:px-5">
             <DashboardLogo />
 
@@ -191,14 +191,16 @@ export default function DashboardLayout({ toolbar, children }) {
               <Sidebar />
             </div>
 
-            <div className="dashboard-panel flex min-h-[620px] flex-1 flex-col self-start overflow-y-auto overscroll-y-contain overflow-x-hidden rounded-[21px] border-t border-[#d7dee8] bg-white lg:mt-0 lg:h-[878px] lg:w-[1390px] lg:max-w-[1390px] lg:flex-none">
+            <div className="dashboard-panel flex min-h-[620px] flex-1 flex-col self-start rounded-[21px] border-t border-[#d7dee8] bg-white lg:mt-0 lg:h-[878px] lg:w-[1390px] lg:max-w-[1390px] lg:flex-none">
               {toolbar ? (
-                <div className="px-6 pb-5 pt-5 lg:px-10 lg:pb-5 lg:pt-5">
+                <div className="z-20 px-6 pb-5 pt-5 lg:px-10 lg:pb-5 lg:pt-5">
                   {toolbar}
                   <div className="mt-5 h-px bg-[#eef1f5]" />
                 </div>
               ) : null}
-              {children}
+              <div className="dashboard-panel-scroll mr-[13px] flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain overflow-x-hidden">
+                {children}
+              </div>
             </div>
 
             <div className="hidden lg:block lg:w-[24px]" />
